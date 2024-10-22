@@ -12,4 +12,7 @@ portingLib.addModuleDependencies([
 
 dependencies {
 	modCompileOnly("io.vram:frex-fabric:$frex_version")
+	// TODO - depends on unreleased Moonrise changes
+	// modCompileOnly("curse.maven:moonrise-1096335:5815099")
+	modCompileOnly(files(file("/Users/jason/IdeaProjects/Porting-Lib/run/mods/Moonrise-Fabric-0.1.0-SNAPSHOT+0d528e5.jar")))
 }

@@ -27,6 +27,10 @@ public class PortingLibMixinPlugin implements IMixinConfigPlugin {
 			return false;
 		if (mixinClassName.contains("EntityBlockRenderContextMixin") && FabricLoader.getInstance().isModLoaded("frex"))
 			return true;
+		if (mixinClassName.contains("mixin.common.ExplosionMixin") && FabricLoader.getInstance().isModLoaded("moonrise"))
+			return false;
+		if (mixinClassName.contains("mixin.common.ChunkMapMixin") && FabricLoader.getInstance().isModLoaded("moonrise"))
+			return false;
 		return true;
 	}
 
