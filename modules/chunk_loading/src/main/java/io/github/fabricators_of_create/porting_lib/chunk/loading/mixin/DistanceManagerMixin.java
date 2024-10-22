@@ -1,7 +1,6 @@
 package io.github.fabricators_of_create.porting_lib.chunk.loading.mixin;
 
-import com.llamalad7.mixinextras.sugar.Local;
-
+import io.github.fabricators_of_create.porting_lib.chunk.loading.ForcedChunkManager;
 import io.github.fabricators_of_create.porting_lib.chunk.loading.extensions.DistanceManagerExtension;
 import it.unimi.dsi.fastutil.longs.Long2ObjectOpenHashMap;
 import net.minecraft.server.level.DistanceManager;
@@ -16,7 +15,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 @Mixin(DistanceManager.class)
 public abstract class DistanceManagerMixin implements DistanceManagerExtension {
@@ -28,31 +26,24 @@ public abstract class DistanceManagerMixin implements DistanceManagerExtension {
 	@Shadow
 	public abstract <T> void removeRegionTicket(TicketType<T> type, ChunkPos pos, int distance, T value);
 
-	private final ThreadLocal<Boolean> forceTicksToggle = ThreadLocal.withInitial(() -> false);
-
 	@Override
 	public <T> void addRegionTicket(TicketType<T> pType, ChunkPos pPos, int pDistance, T pValue, boolean forceTicks) {
-		forceTicksToggle.set(forceTicks);
+		ForcedChunkManager.forceTicksToggle().set(forceTicks);
 		addRegionTicket(pType, pPos, pDistance, pValue);
-		forceTicksToggle.set(false);
+		ForcedChunkManager.forceTicksToggle().set(false);
 	}
 
 	@Override
 	public <T> void removeRegionTicket(TicketType<T> pType, ChunkPos pPos, int pDistance, T pValue, boolean forceTicks) {
-		forceTicksToggle.set(forceTicks);
+		ForcedChunkManager.forceTicksToggle().set(forceTicks);
 		removeRegionTicket(pType, pPos, pDistance, pValue);
-		forceTicksToggle.set(false);
+		ForcedChunkManager.forceTicksToggle().set(false);
 	}
 
 	@Override
 	public boolean shouldForceTicks(long chunkPos) {
 		SortedArraySet<Ticket<?>> tickets = forcedTickets.get(chunkPos);
 		return tickets != null && !tickets.isEmpty();
-	}
-
-	@Inject(method = {"addRegionTicket", "removeRegionTicket"}, at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/ChunkPos;toLong()J"))
-	private <T> void setForcedTicket(TicketType<T> type, ChunkPos pos, int distance, T value, CallbackInfo ci, @Local Ticket<T> ticket) {
-		ticket.setForceTicks(forceTicksToggle.get());
 	}
 
 	@Inject(method = "addTicket(JLnet/minecraft/server/level/Ticket;)V", at = @At("TAIL"))

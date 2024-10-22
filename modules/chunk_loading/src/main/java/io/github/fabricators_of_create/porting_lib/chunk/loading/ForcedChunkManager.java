@@ -31,6 +31,7 @@ import org.jetbrains.annotations.ApiStatus;
 @ParametersAreNonnullByDefault
 public class ForcedChunkManager {
 	private static final Logger LOGGER = LogManager.getLogger();
+	private static final ThreadLocal<Boolean> FORCE_TICKS_TOGGLE = ThreadLocal.withInitial(() -> false);
 	static final TicketType<TicketOwner<BlockPos>> BLOCK = TicketType.create("neoforge:block", Comparator.comparing(info -> info));
 	static final TicketType<TicketOwner<BlockPos>> BLOCK_TICKING = TicketType.create("neoforge:block_ticking", Comparator.comparing(info -> info));
 	static final TicketType<TicketOwner<UUID>> ENTITY = TicketType.create("neoforge:entity", Comparator.comparing(info -> info));
@@ -134,6 +135,11 @@ public class ForcedChunkManager {
 		reinstatePersistentChunks(level, BLOCK_TICKING, saveData.getBlockForcedChunks().tickingChunks, true);
 		reinstatePersistentChunks(level, ENTITY, saveData.getEntityForcedChunks().chunks, false);
 		reinstatePersistentChunks(level, ENTITY_TICKING, saveData.getEntityForcedChunks().tickingChunks, true);
+	}
+
+	@ApiStatus.Internal
+	public static ThreadLocal<Boolean> forceTicksToggle() {
+		return FORCE_TICKS_TOGGLE;
 	}
 
 	/**

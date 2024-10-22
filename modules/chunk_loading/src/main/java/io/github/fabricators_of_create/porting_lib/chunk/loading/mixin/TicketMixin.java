@@ -2,12 +2,16 @@ package io.github.fabricators_of_create.porting_lib.chunk.loading.mixin;
 
 import com.llamalad7.mixinextras.injector.ModifyReturnValue;
 
+import io.github.fabricators_of_create.porting_lib.chunk.loading.ForcedChunkManager;
 import io.github.fabricators_of_create.porting_lib.chunk.loading.extensions.TicketExtension;
 import net.minecraft.server.level.Ticket;
+import net.minecraft.server.level.TicketType;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.List;
 
@@ -23,6 +27,11 @@ public class TicketMixin<T> implements TicketExtension {
 	@Override
 	public boolean isForceTicks() {
 		return this.port_lib$forceTicks;
+	}
+
+	@Inject(method = "<init>", at = @At("CTOR_HEAD"))
+	private void injectConstructor(TicketType<?> type, int ticketLevel, Object key, CallbackInfo ci) {
+		this.port_lib$forceTicks = ForcedChunkManager.forceTicksToggle().get();
 	}
 
 	@ModifyReturnValue(method = "toString", at = @At("RETURN"))
